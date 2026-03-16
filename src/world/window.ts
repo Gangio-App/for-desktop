@@ -14,5 +14,8 @@ contextBridge.exposeInMainWorld("native", {
   maximise: () => ipcRenderer.send("maximise"),
   close: () => ipcRenderer.send("close"),
 
+  getDesktopSources: (options: any) =>
+    ipcRenderer.invoke("get-desktop-sources", options),
+
   setBadgeCount: (count: number) => ipcRenderer.send("setBadgeCount", count),
 });

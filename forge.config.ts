@@ -29,9 +29,9 @@ const makers: ForgeConfig["makers"] = [
     ? [
         new MakerSquirrel({
           name: STRINGS.name,
-          authors: STRINGS.author,
+          authors: "Gangio",
           // todo: hoist this
-          iconUrl: `https://gangio.pro/assets/icon-BKIbMyOd.ico`,
+          iconUrl: `https://gangio.pro/assets/icon.ico`,
           // todo: loadingGif
           setupIcon: `${ASSET_DIR}/icon.ico`,
           description: STRINGS.description,
@@ -138,10 +138,6 @@ const config: ForgeConfig = {
     name: STRINGS.name,
     executableName: STRINGS.execName,
     icon: `${ASSET_DIR}/icon`,
-    // extraResource: [
-    //   // include all the asset files
-    //   ...globSync(ASSET_DIR + "/**/*"),
-    // ],
   },
   rebuildConfig: {},
   makers,

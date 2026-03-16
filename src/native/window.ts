@@ -5,6 +5,7 @@ import {
   Menu,
   MenuItem,
   app,
+  desktopCapturer,
   ipcMain,
   nativeImage,
 } from "electron";
@@ -193,6 +194,11 @@ export function createMainWindow() {
     mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize(),
   );
   ipcMain.on("close", () => mainWindow.close());
+
+  // handle desktop capture sources
+  ipcMain.handle("get-desktop-sources", async (_, options) => {
+    return await desktopCapturer.getSources(options);
+  });
 
   // mainWindow.webContents.openDevTools();
 
