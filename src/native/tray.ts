@@ -38,37 +38,54 @@ export function initTray() {
 }
 
 export function updateTrayMenu() {
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: "Gangio for Desktop", type: "normal", enabled: false },
-      {
-        label: "Version",
-        type: "submenu",
-        submenu: Menu.buildFromTemplate([
-          {
-            label: version,
-            type: "normal",
-            enabled: false,
-          },
-        ]),
-      },
-      { type: "separator" },
-      {
-        label: mainWindow.isVisible() ? "Hide App" : "Show App",
-        type: "normal",
-        click() {
-          if (mainWindow.isVisible()) {
-            mainWindow.hide();
-          } else {
-            mainWindow.show();
-          }
+  const menuItems: any[] = [
+    { label: "Gangio for Desktop", type: "normal", enabled: false },
+    {
+      label: "Version",
+      type: "submenu",
+      submenu: Menu.buildFromTemplate([
+        {
+          label: version,
+          type: "normal",
+          enabled: false,
         },
+      ]),
+    },
+    { type: "separator" },
+  ];
+
+  if (updateStatus === "downloading") {
+    menuItems.push({ label: "Downloading update...", enabled: false });
+    menuItems.push({ type: "separator" });
+  } else if (updateStatus === "ready") {
+    menuItems.push({
+      label: "Restart to Update",
+      click: () => {
+        const { autoUpdater } = require("electron");
+        autoUpdater.quitAndInstall();
       },
-      {
-        label: "Quit App",
-        type: "normal",
-        click: quitApp,
+    });
+    menuItems.push({ type: "separator" });
+  }
+
+  menuItems.push(
+    {
+      label: mainWindow.isVisible() ? "Hide App" : "Show App",
+      type: "normal",
+      click() {
+        if (mainWindow.isVisible()) {
+          mainWindow.hide();
+        } else {
+          mainWindow.show();
+        }
       },
-    ]),
+    },
+    {
+      label: "Quit App",
+      type: "normal",
+      click: quitApp,
+    },
   );
+
+  tray.setContextMenu(Menu.buildFromTemplate(menuItems));
 }

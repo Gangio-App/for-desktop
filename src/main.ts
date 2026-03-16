@@ -1,12 +1,12 @@
 import { IUpdateInfo, updateElectronApp } from "update-electron-app";
 
-import { BrowserWindow, Notification, app, shell } from "electron";
+import { BrowserWindow, Notification, app, ipcMain, shell } from "electron";
 import started from "electron-squirrel-startup";
 
 import { autoLaunch } from "./native/autoLaunch";
 import { config } from "./native/config";
 import { initDiscordRpc } from "./native/discordRpc";
-import { initTray } from "./native/tray";
+import { initTray, setUpdateStatus } from "./native/tray";
 import { BUILD_URL, createMainWindow, mainWindow } from "./native/window";
 
 // Squirrel-specific logic
@@ -24,19 +24,36 @@ if (!config.hardwareAcceleration) {
 // ensure only one copy of the application can run
 const acquiredLock = app.requestSingleInstanceLock();
 
-const onNotifyUser = (_info: IUpdateInfo) => {
-  const notification = new Notification({
-    title: "Update Available",
-    body: "Restart the app to install the update.",
-    silent: true,
-  });
-
-  notification.show();
-};
-
 if (acquiredLock) {
   // start auto update logic
-  updateElectronApp({ onNotifyUser });
+  updateElectronApp({
+    onNotifyUser: (info: IUpdateInfo) => {
+      const notification = new Notification({
+        title: "Update Available",
+        body: "A new version of Gangio is being downloaded.",
+        silent: true,
+      });
+      notification.show();
+      setUpdateStatus("downloading");
+      mainWindow?.webContents.send("update-available", info);
+    },
+    updateInterval: "1 hour",
+  });
+
+  // Listen for when update is actually downloaded and ready
+  app.on("ready", () => {
+    const { autoUpdater } = require("electron");
+    autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
+      setUpdateStatus("ready");
+      mainWindow?.webContents.send("update-ready", { releaseName });
+      
+      const notification = new Notification({
+        title: "Update Ready",
+        body: "Restart Gangio to apply the update.",
+      });
+      notification.show();
+    });
+  });
 
   // create and configure the app when electron is ready
   app.on("ready", () => {

@@ -17,5 +17,10 @@ contextBridge.exposeInMainWorld("native", {
   getDesktopSources: (options: any) =>
     ipcRenderer.invoke("get-desktop-sources", options),
 
+  restartToUpdate: () => ipcRenderer.send("restart-to-update"),
+
+  onUpdateReady: (callback: () => void) =>
+    ipcRenderer.on("update-ready", () => callback()),
+
   setBadgeCount: (count: number) => ipcRenderer.send("setBadgeCount", count),
 });

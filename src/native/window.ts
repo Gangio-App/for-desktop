@@ -195,6 +195,11 @@ export function createMainWindow() {
   );
   ipcMain.on("close", () => mainWindow.close());
 
+  ipcMain.on("restart-to-update", () => {
+    const { autoUpdater } = require("electron");
+    autoUpdater.quitAndInstall();
+  });
+
   // handle desktop capture sources
   ipcMain.handle("get-desktop-sources", async (_, options) => {
     return await desktopCapturer.getSources(options);
