@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>chat.stoat.StoatDesktop</id>
-  <launchable type="desktop-id">chat.stoat.StoatDesktop.desktop</launchable>
-  <name>Stoat</name>
-  <developer id="chat.stoat">
-    <name>Revolt Platforms Ltd</name>
+  <id>pro.gangio.GangioDesktop</id>
+  <launchable type="desktop-id">pro.gangio.GangioDesktop.desktop</launchable>
+  <name>Gangio</name>
+  <developer id="pro.gangio">
+    <name>Gangio</name>
   </developer>
   <summary>Open source, user-first chat platform</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>AGPL-3.0</project_license>
   <icon type="remote" height="256" width="256">
-    https://raw.githubusercontent.com/stoatchat/assets/f106946659af67ad4f008588ac51570029b2fd47/desktop/icon.png</icon>
+    https://gangio.pro/assets/icon-BKIbMyOd.ico</icon>
   <description>
-    <p>Stoat is an open source, user-first chat platform. Send messages, share
+    <p>Gangio is an open source, user-first chat platform. Send messages, share
       images, mention users, and join voice channels — all from a native desktop
       application.</p>
   </description>
@@ -50,9 +50,9 @@
       </description>
     </release>
   </releases>
-  <url type="bugtracker">https://github.com/stoatchat/for-desktop/issues</url>
-  <url type="homepage">https://stoat.chat</url>
-  <url type="vcs-browser">https://github.com/stoatchat/for-desktop</url>
+  <url type="bugtracker">https://github.com/gangio/for-desktop/issues</url>
+  <url type="homepage">https://gangio.pro</url>
+  <url type="vcs-browser">https://github.com/gangio/for-desktop</url>
   <content_rating type="oars-1.1">
     <content_attribute id="social-chat">intense</content_attribute>
     <content_attribute id="social-info">intense</content_attribute>

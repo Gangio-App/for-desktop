@@ -52,7 +52,7 @@ if (acquiredLock) {
     }
 
     initTray();
-    initDiscordRpc();
+    initDiscordRpc("Gangio");
 
     // Windows specific fix for notifications
     if (process.platform === "win32") {

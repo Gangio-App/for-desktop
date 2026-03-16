@@ -5,7 +5,7 @@ import { config } from "./config";
 // internal state
 let rpc: Client;
 
-export async function initDiscordRpc() {
+export async function initDiscordRpc(name = "Stoat") {
   if (!config.discordRpc) return;
 
   // clean up existing client if one exists
@@ -16,14 +16,14 @@ export async function initDiscordRpc() {
 
     rpc.on("ready", () =>
       rpc.setActivity({
-        state: "stoat.chat",
+        state: "gangio.pro",
         details: "Chatting with others",
         largeImageKey: "qr",
-        largeImageText: "Join Stoat!",
+        largeImageText: `Join ${name}!`,
         buttons: [
           {
-            label: "Join Stoat",
-            url: "https://stoat.chat/",
+            label: `Join ${name}`,
+            url: "https://gangio.pro/",
           },
         ],
       }),

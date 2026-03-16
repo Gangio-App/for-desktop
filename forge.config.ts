@@ -13,9 +13,9 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 // import { globSync } from "node:fs";
 
 const STRINGS = {
-  author: "Revolt Platforms LTD",
-  name: "Stoat",
-  execName: "stoat-desktop",
+  author: "Gangio",
+  name: "Gangio",
+  execName: "gangio-desktop",
   description: "Open source user-first chat platform.",
 };
 
@@ -25,108 +25,111 @@ const ASSET_DIR = "assets/desktop";
  * Build targets for the desktop app
  */
 const makers: ForgeConfig["makers"] = [
-  new MakerSquirrel({
-    name: STRINGS.name,
-    authors: STRINGS.author,
-    // todo: hoist this
-    iconUrl: `https://stoat.chat/app/assets/icon-DUSNE-Pb.ico`,
-    // todo: loadingGif
-    setupIcon: `${ASSET_DIR}/icon.ico`,
-    description: STRINGS.description,
-    exe: `${STRINGS.execName}.exe`,
-    setupExe: `${STRINGS.execName}-setup.exe`,
-    copyright: "Copyright (C) 2025 Revolt Platforms LTD",
-  }),
+  ...(process.platform === "win32"
+    ? [
+        new MakerSquirrel({
+          name: STRINGS.name,
+          authors: STRINGS.author,
+          // todo: hoist this
+          iconUrl: `https://gangio.pro/assets/icon-BKIbMyOd.ico`,
+          // todo: loadingGif
+          setupIcon: `${ASSET_DIR}/icon.ico`,
+          description: STRINGS.description,
+          exe: `${STRINGS.execName}.exe`,
+          setupExe: `${STRINGS.execName}-setup.exe`,
+          copyright: "Copyright (C) 2026 Gangio",
+        }),
+      ]
+    : []),
   new MakerZIP({}),
+  new MakerDeb({
+    options: {
+      productName: STRINGS.name,
+      productDescription: STRINGS.description,
+      categories: ["Network"],
+      icon: `${ASSET_DIR}/icon.png`,
+    },
+  }),
 ];
 
 // skip these makers in CI/CD
 if (!process.env.PLATFORM) {
-  makers.push(
-    // must be manually built (freezes CI process)
-    // not much use in being published anyhow
-    new MakerAppX({
-      certPass: "",
-      packageExecutable: `app\\${STRINGS.execName}.exe`,
-      publisher: "CN=B040CC7E-0016-4AF5-957F-F8977A6CFA3B",
-    }),
-    // flatpak publishing should occur through flathub repos.
-    // this is just for testing purposes
-    new MakerFlatpak({
-      options: {
-        id: "chat.stoat.stoat-desktop",
-        description: STRINGS.description,
-        productName: STRINGS.name,
-        productDescription: STRINGS.description,
-        runtimeVersion: "25.08",
-        icon: {
-          "16x16": `${ASSET_DIR}/hicolor/16x16.png`,
-          "32x32": `${ASSET_DIR}/hicolor/32x32.png`,
-          "64x64": `${ASSET_DIR}/hicolor/64x64.png`,
-          "128x128": `${ASSET_DIR}/hicolor/128x128.png`,
-          "256x256": `${ASSET_DIR}/hicolor/256x256.png`,
-          "512x512": `${ASSET_DIR}/hicolor/512x512.png`,
-        } as unknown,
-        categories: ["Network"],
-        modules: [
-          // use the latest zypak -- Electron sandboxing for Flatpak
-          {
-            name: "zypak",
-            sources: [
-              {
-                type: "git",
-                url: "https://github.com/refi64/zypak",
-                tag: "v2025.09",
-              },
-            ],
-          },
-        ],
-        finishArgs: [
-          // default arguments found by running
-          // DEBUG=electron-installer-flatpak* pnpm make
-          "--socket=fallback-x11",
-          "--share=ipc",
-          "--device=dri",
-          "--socket=pulseaudio",
-          "--filesystem=home",
-          "--env=TMPDIR=/var/tmp",
-          "--share=network",
-          "--talk-name=org.freedesktop.Notifications",
-          // add Unity talk name for badges
-          "--talk-name=com.canonical.Unity",
-        ],
-        // files: [
-        //   // is this necessary?
-        //   // https://stackoverflow.com/q/79745700
-        //   ...[16, 32, 64, 128, 256, 512].map(
-        //     (size) =>
-        //       [
-        //         `assets/desktop/hicolor/${size}x${size}.png`,
-        //         `/app/share/icons/hicolor/${size}x${size}/apps/chat.stoat.stoat-desktop.png`,
-        //       ] as [string, string],
-        //   ),
-        //   [
-        //     `assets/desktop/icon.svg`,
-        //     `/app/share/icons/hicolor/scalable/apps/chat.stoat.stoat-desktop.svg`,
-        //   ] as [string, string],
-        // ],
-        files: [],
-      } as MakerFlatpakOptionsConfig,
-      /* as Omit<
-        MakerFlatpakOptionsConfig,
-        "files"
-      > */
-    }),
-    // testing purposes
-    new MakerDeb({
-      options: {
-        productName: STRINGS.name,
-        productDescription: STRINGS.description,
-        categories: ["Network"],
-        icon: `${ASSET_DIR}/icon.png`,
-      },
-    }),
-  );
+  // makers.push(
+  //   // must be manually built (freezes CI process)
+  //   // not much use in being published anyhow
+  //   new MakerAppX({
+  //     certPass: "",
+  //     packageExecutable: `app\\${STRINGS.execName}.exe`,
+  //     publisher: "CN=B040CC7E-0016-4AF5-957F-F8977A6CFA3B",
+  //   }),
+  //   // flatpak publishing should occur through flathub repos.
+  //   // this is just for testing purposes
+  //   new MakerFlatpak({
+  //     options: {
+  //       id: "pro.gangio.GangioDesktop",
+  //       description: STRINGS.description,
+  //       productName: STRINGS.name,
+  //       productDescription: STRINGS.description,
+  //       runtimeVersion: "25.08",
+  //       icon: {
+  //         "16x16": `${ASSET_DIR}/hicolor/16x16.png`,
+  //         "32x32": `${ASSET_DIR}/hicolor/32x32.png`,
+  //         "64x64": `${ASSET_DIR}/hicolor/64x64.png`,
+  //         "128x128": `${ASSET_DIR}/hicolor/128x128.png`,
+  //         "256x256": `${ASSET_DIR}/hicolor/256x256.png`,
+  //         "512x512": `${ASSET_DIR}/hicolor/512x512.png`,
+  //       } as unknown,
+  //       categories: ["Network"],
+  //       modules: [
+  //         // use the latest zypak -- Electron sandboxing for Flatpak
+  //         {
+  //           name: "zypak",
+  //           sources: [
+  //             {
+  //               type: "git",
+  //               url: "https://github.com/refi64/zypak",
+  //               tag: "v2025.09",
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //       finishArgs: [
+  //         // default arguments found by running
+  //         // DEBUG=electron-installer-flatpak* pnpm make
+  //         "--socket=fallback-x11",
+  //         "--share=ipc",
+  //         "--device=dri",
+  //         "--socket=pulseaudio",
+  //         "--filesystem=home",
+  //         "--env=TMPDIR=/var/tmp",
+  //         "--share=network",
+  //         "--talk-name=org.freedesktop.Notifications",
+  //         // add Unity talk name for badges
+  //         "--talk-name=com.canonical.Unity",
+  //       ],
+  //       // files: [
+  //       //   // is this necessary?
+  //       //   // https://stackoverflow.com/q/79745700
+  //       //   ...[16, 32, 64, 128, 256, 512].map(
+  //       //     (size) =>
+  //       //       [
+  //       //         `assets/desktop/hicolor/${size}x${size}.png`,
+  //       //         `/app/share/icons/hicolor/${size}x${size}/apps/chat.stoat.stoat-desktop.png`,
+  //       //       ] as [string, string],
+  //       //   ),
+  //       //   [
+  //       //     `assets/desktop/icon.svg`,
+  //       //     `/app/share/icons/hicolor/scalable/apps/chat.stoat.stoat-desktop.svg`,
+  //       //   ] as [string, string],
+  //       // ],
+  //       files: [],
+  //     } as MakerFlatpakOptionsConfig,
+  //     /* as Omit<
+  //       MakerFlatpakOptionsConfig,
+  //       "files"
+  //     > */
+  //   }),
+  // );
 }
 
 const config: ForgeConfig = {
@@ -176,7 +179,7 @@ const config: ForgeConfig = {
   publishers: [
     new PublisherGithub({
       repository: {
-        owner: "stoatchat",
+        owner: "gangio",
         name: "for-desktop",
       },
     }),
