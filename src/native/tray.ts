@@ -8,6 +8,15 @@ import { mainWindow, quitApp } from "./window";
 
 // internal tray state
 let tray: Tray = null;
+let updateStatus: "none" | "downloading" | "ready" = "none";
+
+/**
+ * Set the update status and refresh the tray menu
+ */
+export function setUpdateStatus(status: typeof updateStatus) {
+  updateStatus = status;
+  updateTrayMenu();
+}
 
 // Create and resize tray icon for macOS
 function createTrayIcon() {
