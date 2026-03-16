@@ -1,0 +1,43 @@
+name: Build macOS App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  macos-build:
+    name: macOS Build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout assets
+        run: git -c submodule."assets".update=checkout submodule update --init assets
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Make
+        run: pnpm run make
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gangio-macos
+          path: |
+            out/make/zip/darwin/**
+            out/make/zip/macos/**
+            out/make/**/*.dmg
+            out/make/**/*.pkg
