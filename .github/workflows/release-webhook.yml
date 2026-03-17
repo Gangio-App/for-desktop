@@ -12,10 +12,11 @@ jobs:
 
     steps:
       - name: Send release notification webhook
+        if: ${{ secrets.GANGIO_WEBHOOK_UPDATES_URL != '' || secrets.STOAT_WEBHOOK_UPDATES_URL != '' }}
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
           REPOSITORY: ${{ github.repository }}
-          WEBHOOK_URL: ${{ secrets.STOAT_WEBHOOK_UPDATES_URL }}
+          WEBHOOK_URL: ${{ secrets.GANGIO_WEBHOOK_UPDATES_URL || secrets.STOAT_WEBHOOK_UPDATES_URL }}
         run: |
           RELEASE_URL="https://github.com/${REPOSITORY}/releases/tag/${TAG_NAME}"
           curl -X POST "$WEBHOOK_URL" \

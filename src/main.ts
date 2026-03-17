@@ -1,4 +1,4 @@
-import { IUpdateInfo, updateElectronApp } from "update-electron-app";
+import { IUpdateInfo, UpdateSourceType, updateElectronApp } from "update-electron-app";
 
 import { BrowserWindow, Notification, app, ipcMain, shell } from "electron";
 import started from "electron-squirrel-startup";
@@ -27,6 +27,10 @@ const acquiredLock = app.requestSingleInstanceLock();
 if (acquiredLock) {
   // start auto update logic
   updateElectronApp({
+    updateSource: {
+      type: UpdateSourceType.ElectronPublicUpdateService,
+      repo: "gangio/for-desktop",
+    },
     onNotifyUser: (info: IUpdateInfo) => {
       const notification = new Notification({
         title: "Update Available",
@@ -73,7 +77,7 @@ if (acquiredLock) {
 
     // Windows specific fix for notifications
     if (process.platform === "win32") {
-      app.setAppUserModelId("chat.stoat.notifications");
+      app.setAppUserModelId("pro.gangio.GangioDesktop");
     }
   });
 

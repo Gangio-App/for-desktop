@@ -1,9 +1,9 @@
 {
   "name": "gangio-desktop",
   "productName": "Gangio",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": ".vite/build/main.js",
-  "repository": "stoatchat/desktop",
+  "repository": "gangio/for-desktop",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
