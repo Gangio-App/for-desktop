@@ -36,10 +36,12 @@ const windowIcon = nativeImage.createFromDataURL(windowIconAsset);
 /**
  * Create the main application window
  */
-export function createMainWindow() {
+export function createMainWindow(options?: { show?: boolean }) {
   // (CLI arg --hidden or config)
   const startHidden =
     app.commandLine.hasSwitch("hidden") || config.startMinimisedToTray;
+
+  const shouldShow = options?.show ?? !startHidden;
 
   // create the window
   mainWindow = new BrowserWindow({
@@ -50,7 +52,7 @@ export function createMainWindow() {
     backgroundColor: "#191919",
     frame: !config.customFrame,
     icon: windowIcon,
-    show: !startHidden,
+    show: shouldShow,
     webPreferences: {
       // relative to `.vite/build`
       preload: join(__dirname, "preload.js"),

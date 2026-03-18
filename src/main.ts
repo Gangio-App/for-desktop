@@ -6,6 +6,7 @@ import started from "electron-squirrel-startup";
 import { autoLaunch } from "./native/autoLaunch";
 import { config } from "./native/config";
 import { initDiscordRpc } from "./native/discordRpc";
+import { createSplashWindow, sendSplashStatus } from "./native/splash";
 import { initTray, setUpdateStatus } from "./native/tray";
 import { BUILD_URL, createMainWindow, mainWindow } from "./native/window";
 
@@ -44,25 +45,85 @@ if (acquiredLock) {
     updateInterval: "1 hour",
   });
 
-  // Listen for when update is actually downloaded and ready
-  app.on("ready", () => {
-    const { autoUpdater } = require("electron");
-    autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
-      setUpdateStatus("ready");
-      mainWindow?.webContents.send("update-ready", { releaseName });
-      
-      const notification = new Notification({
-        title: "Update Ready",
-        body: "Restart Gangio to apply the update.",
-      });
-      notification.show();
-    });
-  });
-
   // create and configure the app when electron is ready
   app.on("ready", () => {
+    const startHidden =
+      app.commandLine.hasSwitch("hidden") || config.startMinimisedToTray;
+
+    // Show splash only when we're going to show the main window.
+    const splash = startHidden ? undefined : createSplashWindow();
+    sendSplashStatus(splash, { phase: "starting", message: "Starting…" });
+
+    const { autoUpdater } = require("electron");
+
+    autoUpdater.on("checking-for-update", () => {
+      sendSplashStatus(splash, {
+        phase: "checking",
+        message: "Checking for updates…",
+      });
+    });
+
+    autoUpdater.on("update-available", () => {
+      sendSplashStatus(splash, {
+        phase: "update-available",
+        message: "Update found. Downloading…",
+      });
+      setUpdateStatus("downloading");
+    });
+
+    autoUpdater.on("download-progress", (progress: any) => {
+      const percent =
+        typeof progress?.percent === "number" ? progress.percent : undefined;
+
+      sendSplashStatus(splash, {
+        phase: "downloading",
+        message: "Downloading update…",
+        percent,
+        transferred:
+          typeof progress?.transferred === "number"
+            ? progress.transferred
+            : undefined,
+        total: typeof progress?.total === "number" ? progress.total : undefined,
+      });
+    });
+
+    autoUpdater.on(
+      "update-downloaded",
+      (_event: any, _releaseNotes: any, releaseName: string) => {
+        setUpdateStatus("ready");
+        mainWindow?.webContents.send("update-ready", { releaseName });
+        sendSplashStatus(splash, {
+          phase: "ready",
+          message: "Update ready. Restart to apply.",
+        });
+
+        const notification = new Notification({
+          title: "Update Ready",
+          body: "Restart Gangio to apply the update.",
+        });
+        notification.show();
+      },
+    );
+
+    autoUpdater.on("error", (err: unknown) => {
+      sendSplashStatus(splash, {
+        phase: "error",
+        message: "Update error. Starting normally…",
+      });
+      console.error("AutoUpdater error", err);
+    });
+
     // create window and application contexts
-    createMainWindow();
+    createMainWindow({ show: startHidden ? false : false });
+
+    // Once the main window has rendered, show it and close splash.
+    if (!startHidden) {
+      mainWindow.once("ready-to-show", () => {
+        if (splash && !splash.isDestroyed()) splash.close();
+        mainWindow.show();
+        mainWindow.focus();
+      });
+    }
 
     // enable auto start on Windows and MacOS
     if (config.firstLaunch) {
