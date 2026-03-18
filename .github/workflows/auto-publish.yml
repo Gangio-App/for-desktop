@@ -41,17 +41,20 @@ jobs:
       - name: Generate macOS ICNS
         if: matrix.os == 'macos-latest'
         run: |
+          set -euo pipefail
           mkdir -p assets/desktop/Gangio.iconset
-          cp assets/desktop/hicolor/16x16.png assets/desktop/Gangio.iconset/icon_16x16.png
-          cp assets/desktop/hicolor/32x32.png assets/desktop/Gangio.iconset/icon_16x16@2x.png
-          cp assets/desktop/hicolor/32x32.png assets/desktop/Gangio.iconset/icon_32x32.png
-          cp assets/desktop/hicolor/64x64.png assets/desktop/Gangio.iconset/icon_32x32@2x.png
-          cp assets/desktop/hicolor/128x128.png assets/desktop/Gangio.iconset/icon_128x128.png
-          cp assets/desktop/hicolor/256x256.png assets/desktop/Gangio.iconset/icon_128x128@2x.png
-          cp assets/desktop/hicolor/256x256.png assets/desktop/Gangio.iconset/icon_256x256.png
-          cp assets/desktop/hicolor/512x512.png assets/desktop/Gangio.iconset/icon_256x256@2x.png
-          cp assets/desktop/hicolor/512x512.png assets/desktop/Gangio.iconset/icon_512x512.png
-          cp assets/desktop/hicolor/512x512.png assets/desktop/Gangio.iconset/icon_512x512@2x.png
+          SOURCE_ICON="assets/desktop/icon@3x.png"
+          test -f "$SOURCE_ICON"
+          sips -z 16 16 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_16x16.png
+          sips -z 32 32 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_16x16@2x.png
+          sips -z 32 32 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_32x32.png
+          sips -z 64 64 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_32x32@2x.png
+          sips -z 128 128 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_128x128.png
+          sips -z 256 256 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_128x128@2x.png
+          sips -z 256 256 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_256x256.png
+          sips -z 512 512 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_256x256@2x.png
+          sips -z 512 512 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_512x512.png
+          sips -z 1024 1024 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_512x512@2x.png
           iconutil -c icns assets/desktop/Gangio.iconset -o assets/desktop/icon.icns
           rm -rf assets/desktop/Gangio.iconset
 
