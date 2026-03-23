@@ -38,10 +38,10 @@ export function initTray() {
   tray.setImage(trayIcon);
   tray.on("click", () => {
     if (mainWindow.isVisible()) {
-     mainWindow.hide();
+      mainWindow.hide();
     } else {
-     mainWindow.show();
-     mainWindow.focus();
+      mainWindow.show();
+      mainWindow.focus();
     }
   });
 }
@@ -79,7 +79,7 @@ export function updateTrayMenu() {
 
   menuItems.push(
     {
-      label: mainWindow.isVisible() ? "Hide App" : "Show App",
+      label: mainWindow.isVisible() ? "Hide Gangio" : "Show Gangio",
       type: "normal",
       click() {
         if (mainWindow.isVisible()) {
@@ -90,7 +90,7 @@ export function updateTrayMenu() {
       },
     },
     {
-      label: "Quit App",
+      label: "Quit Gangio",
       type: "normal",
       click: quitApp,
     },

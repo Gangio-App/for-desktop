@@ -24,3 +24,16 @@ contextBridge.exposeInMainWorld("native", {
 
   setBadgeCount: (count: number) => ipcRenderer.send("setBadgeCount", count),
 });
+
+// Override web notifications to use native ones
+const OldNotification = (window as any).Notification;
+class NativeNotification extends (OldNotification as any) {
+  constructor(title: string, options: any) {
+    super(title, options);
+    ipcRenderer.send("notification", { title, ...options });
+  }
+}
+
+(window as any).Notification = NativeNotification;
+(window as any).Notification.permission = "granted";
+(window as any).Notification.requestPermission = async () => "granted";

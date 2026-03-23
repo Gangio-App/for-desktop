@@ -8,6 +8,7 @@ import {
   desktopCapturer,
   ipcMain,
   nativeImage,
+  Notification,
 } from "electron";
 
 import windowIconAsset from "../../assets/desktop/icon.png?asset";
@@ -206,6 +207,27 @@ export function createMainWindow(options?: { show?: boolean }) {
   ipcMain.handle("get-desktop-sources", async (_, options) => {
     return await desktopCapturer.getSources(options);
   });
+
+  // Handle native notifications forwarded from the world bridge
+  ipcMain.on(
+    "notification",
+    async (_event, options: { title: string; body: string; icon: string }) => {
+      const notification = new Notification({
+        title: options.title,
+        body: options.body,
+        icon: options.icon
+          ? await (nativeImage as any).createFromURL(options.icon)
+          : undefined,
+      });
+
+      notification.on("click", () => {
+        mainWindow.show();
+        mainWindow.focus();
+      });
+
+      notification.show();
+    },
+  );
 
   // mainWindow.webContents.openDevTools();
 
