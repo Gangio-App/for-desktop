@@ -37,6 +37,7 @@ export function initTray() {
   tray.setToolTip("Gangio for Desktop");
   tray.setImage(trayIcon);
   tray.on("click", () => {
+    if (!mainWindow) return;
     if (mainWindow.isVisible()) {
       mainWindow.hide();
     } else {
@@ -47,6 +48,8 @@ export function initTray() {
 }
 
 export function updateTrayMenu() {
+  if (!tray) return;
+
   const menuItems: any[] = [
     { label: `Gangio for Desktop (v${version})`, type: "normal", enabled: false },
     { type: "separator" },
@@ -79,11 +82,14 @@ export function updateTrayMenu() {
     },
   });
 
+  const isVisible = mainWindow ? mainWindow.isVisible() : false;
+
   menuItems.push(
     {
-      label: mainWindow.isVisible() ? "Hide Gangio" : "Show Gangio",
+      label: isVisible ? "Hide Gangio" : "Show Gangio",
       type: "normal",
       click() {
+        if (!mainWindow) return;
         if (mainWindow.isVisible()) {
           mainWindow.hide();
         } else {

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.6](https://github.com/Gangio-App/for-desktop/compare/v1.3.5...v1.3.6) (2026-04-04)
+
+### Bug Fixes
+
+* fix critical startup crash when tray or main window is NOT yet initialized during update checks.
+
 ## [1.3.5](https://github.com/Gangio-App/for-desktop/compare/v1.3.2...v1.3.5) (2026-04-04)
 
 ### Features
