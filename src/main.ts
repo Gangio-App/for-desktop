@@ -137,7 +137,8 @@ if (acquiredLock) {
     initDiscordRpc("Gangio");
 
     // Fix for notifications
-    app.setAppUserModelId("pro.gangio.GangioDesktop");
+    app.name = "Gangio";
+    app.setAppUserModelId("Gangio");
   });
 
   // focus the window if we try to launch again

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/gangio/for-desktop/compare/v1.3.1...v1.3.2) (2026-04-04)
+
+
+### Bug Fixes
+
+* fix app name in notifications (always use Gangio instead of ID).
+
 ## [1.3.1](https://github.com/gangio/for-desktop/compare/v1.3.0...v1.3.1) (2026-04-04)
 
 
