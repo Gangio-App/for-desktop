@@ -56,6 +56,17 @@ if (acquiredLock) {
  
       const { autoUpdater } = require("electron");
  
+      // Safety timer: if update check takes more than 5 seconds, bootstrap anyway
+      let safetyTimer: NodeJS.Timeout | undefined;
+      if (!startHidden) {
+        safetyTimer = setTimeout(() => {
+          if (!mainWindow || mainWindow.isDestroyed()) {
+            console.log("Update check timed out, launching...");
+            bootstrapMainWindow(splash, startHidden);
+          }
+        }, 5000);
+      }
+ 
       autoUpdater.on("checking-for-update", () => {
         sendSplashStatus(splash, {
           phase: "checking",
@@ -64,6 +75,7 @@ if (acquiredLock) {
       });
  
       autoUpdater.on("update-available", () => {
+        if (safetyTimer) clearTimeout(safetyTimer);
         sendSplashStatus(splash, {
           phase: "update-available",
           message: "Update found. Downloading…",
@@ -111,26 +123,26 @@ if (acquiredLock) {
       );
  
       autoUpdater.on("update-not-available", () => {
+        if (typeof safetyTimer !== 'undefined') clearTimeout(safetyTimer);
         setUpdateStatus("none");
         sendSplashStatus(splash, {
           phase: "starting",
           message: "All good! Launching…",
         });
         
-        // No update needed, proceed to create the main window
         if (!mainWindow || mainWindow.isDestroyed()) {
            bootstrapMainWindow(splash, startHidden);
         }
       });
  
       autoUpdater.on("error", (err: unknown) => {
+        if (safetyTimer) clearTimeout(safetyTimer);
         sendSplashStatus(splash, {
           phase: "error",
           message: "Update error. Starting normally…",
         });
         console.error("AutoUpdater error", err);
         
-        // On error, still try to launch the main app
         if (!mainWindow || mainWindow.isDestroyed()) {
            bootstrapMainWindow(splash, startHidden);
         }
@@ -138,7 +150,13 @@ if (acquiredLock) {
  
       // Start the update scan
       setUpdateStatus("checking");
-      autoUpdater.checkForUpdates();
+      try {
+        autoUpdater.checkForUpdates();
+      } catch (e) {
+        if (safetyTimer) clearTimeout(safetyTimer);
+        console.error("Manual update check failed", e);
+        bootstrapMainWindow(splash, startHidden);
+      }
  
       // enable auto start on Windows and MacOS
       if (config.firstLaunch) {
