@@ -1,11 +1,11 @@
 [Desktop Entry]
-Name=Stoat
+Name=Gangio
 Comment=Open source, user-first chat platform
-Exec=stoat-desktop
+Exec=gangio-desktop
 Terminal=false
 Type=Application
-Icon=chat.stoat.StoatDesktop
+Icon=pro.gangio.GangioDesktop
 Categories=Network;InstantMessaging
-StartupWMClass=stoat-desktop
+StartupWMClass=gangio-desktop
 X-Desktop-File-Install-Version=0.26
-X-Flatpak=chat.stoat.StoatDesktop
+X-Flatpak=pro.gangio.GangioDesktop

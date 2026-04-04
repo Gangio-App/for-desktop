@@ -1,7 +1,7 @@
 {
   "name": "gangio-desktop",
   "productName": "Gangio",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "main": ".vite/build/main.js",
   "repository": "gangio/for-desktop",
   "scripts": {
@@ -10,8 +10,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
-    "install:flatpak": "flatpak --user install out/make/flatpak/x86_64/chat.stoat.stoat-desktop_stable_x86_64.flatpak",
-    "run:flatpak": "flatpak run --socket=session-bus chat.stoat.stoat-desktop",
+    "install:flatpak": "flatpak --user install out/make/flatpak/x86_64/pro.gangio.GangioDesktop_stable_x86_64.flatpak",
+    "run:flatpak": "flatpak run --socket=session-bus pro.gangio.GangioDesktop",
     "run:nix": "/usr/bin/env electron-nix .",
     "release": "node scripts/release.js"
   },

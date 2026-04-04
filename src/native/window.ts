@@ -204,8 +204,19 @@ export function createMainWindow(options?: { show?: boolean }) {
   });
 
   // handle desktop capture sources
-  ipcMain.handle("get-desktop-sources", async (_, options) => {
-    return await desktopCapturer.getSources(options);
+  ipcMain.handle("get-desktop-sources", async (_, _options) => {
+    const sources = await desktopCapturer.getSources({
+      types: ["window", "screen"],
+      thumbnailSize: { width: 500, height: 500 },
+      fetchWindowIcons: true
+    });
+    return sources.map((source) => ({
+      id: source.id,
+      name: source.name,
+      display_id: source.display_id,
+      thumbnailDataUrl: source.thumbnail.toDataURL(),
+      appIconDataUrl: source.appIcon ? source.appIcon.toDataURL() : undefined,
+    }));
   });
 
   // Handle native notifications forwarded from the world bridge

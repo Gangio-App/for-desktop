@@ -136,10 +136,8 @@ if (acquiredLock) {
     initTray();
     initDiscordRpc("Gangio");
 
-    // Windows specific fix for notifications
-    if (process.platform === "win32") {
-      app.setAppUserModelId("Gangio");
-    }
+    // Fix for notifications
+    app.setAppUserModelId("pro.gangio.GangioDesktop");
   });
 
   // focus the window if we try to launch again

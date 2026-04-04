@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/gangio/for-desktop/compare/v1.3.0...v1.3.1) (2026-04-04)
+
+
+### Bug Fixes
+
+* rename remaining Stoat references to Gangio.
+* set full app ID for notifications.
+
 ## [1.3.0](https://github.com/stoatchat/for-desktop/compare/v1.2.0...v1.3.0) (2026-02-18)
 
 

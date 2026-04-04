@@ -5,7 +5,7 @@ import { config } from "./config";
 // internal state
 let rpc: Client;
 
-export async function initDiscordRpc(name = "Stoat") {
+export async function initDiscordRpc(name = "Gangio") {
   if (!config.discordRpc) return;
 
   // clean up existing client if one exists
