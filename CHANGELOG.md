@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.8](https://github.com/Gangio-App/for-desktop/compare/v1.3.7...v1.3.8) (2026-04-04)
+
+### Bug Fixes
+
+* fix tray menu getting permanently stuck on "Checking for updates...".
+* ensure `updateStatus` correctly resets to `none` if the updater fails or times out.
+
 ## [1.3.7](https://github.com/Gangio-App/for-desktop/compare/v1.3.6...v1.3.7) (2026-04-04)
 
 ### Bug Fixes

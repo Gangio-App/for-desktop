@@ -62,6 +62,7 @@ if (acquiredLock) {
         safetyTimer = setTimeout(() => {
           if (!mainWindow || mainWindow.isDestroyed()) {
             console.log("Update check timed out, launching...");
+            setUpdateStatus("none");
             bootstrapMainWindow(splash, startHidden);
           }
         }, 5000);
@@ -155,6 +156,7 @@ if (acquiredLock) {
       } catch (e) {
         if (safetyTimer) clearTimeout(safetyTimer);
         console.error("Manual update check failed", e);
+        setUpdateStatus("none");
         bootstrapMainWindow(splash, startHidden);
       }
  

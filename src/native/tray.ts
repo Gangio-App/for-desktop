@@ -78,7 +78,19 @@ export function updateTrayMenu() {
     click: () => {
       setUpdateStatus("checking");
       const { autoUpdater } = require("electron");
-      autoUpdater.checkForUpdates();
+      try {
+        autoUpdater.checkForUpdates();
+      } catch (e) {
+        console.error("Manual update check inside tray failed", e);
+        setUpdateStatus("none");
+      }
+      
+      // Auto-revert UI if it gets stuck checking
+      setTimeout(() => {
+         if (updateStatus === 'checking') {
+             setUpdateStatus("none");
+         }
+      }, 5000);
     },
   });
 

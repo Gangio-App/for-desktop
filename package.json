@@ -1,7 +1,7 @@
 {
   "name": "gangio-desktop",
   "productName": "Gangio",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "main": ".vite/build/main.js",
   "repository": "Gangio-App/for-desktop",
   "scripts": {
