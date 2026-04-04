@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld("native", {
 
   restartToUpdate: () => ipcRenderer.send("restart-to-update"),
 
+  onUpdateAvailable: (callback: () => void) =>
+    ipcRenderer.on("update-available", () => callback()),
+
   onUpdateReady: (callback: () => void) =>
     ipcRenderer.on("update-ready", () => callback()),
 
