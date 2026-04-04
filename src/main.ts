@@ -105,6 +105,10 @@ if (acquiredLock) {
       },
     );
 
+    autoUpdater.on("update-not-available", () => {
+      setUpdateStatus("none");
+    });
+
     autoUpdater.on("error", (err: unknown) => {
       sendSplashStatus(splash, {
         phase: "error",

@@ -8,7 +8,7 @@ import { mainWindow, quitApp } from "./window";
 
 // internal tray state
 let tray: Tray = null;
-let updateStatus: "none" | "downloading" | "ready" = "none";
+let updateStatus: "none" | "checking" | "downloading" | "ready" = "none";
 
 /**
  * Set the update status and refresh the tray menu
@@ -63,7 +63,10 @@ export function updateTrayMenu() {
     { type: "separator" },
   ];
 
-  if (updateStatus === "downloading") {
+  if (updateStatus === "checking") {
+    menuItems.push({ label: "Checking for updates...", enabled: false });
+    menuItems.push({ type: "separator" });
+  } else if (updateStatus === "downloading") {
     menuItems.push({ label: "Downloading update...", enabled: false });
     menuItems.push({ type: "separator" });
   } else if (updateStatus === "ready") {
@@ -76,6 +79,16 @@ export function updateTrayMenu() {
     });
     menuItems.push({ type: "separator" });
   }
+
+  // Add the check for updates button
+  menuItems.push({
+    label: "Check for Updates",
+    click: () => {
+      setUpdateStatus("checking");
+      const { autoUpdater } = require("electron");
+      autoUpdater.checkForUpdates();
+    },
+  });
 
   menuItems.push(
     {
