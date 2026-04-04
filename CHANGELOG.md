@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.4.0](https://github.com/Gangio-App/for-desktop/compare/v1.3.0...v1.4.0) (2026-04-04)
+
+
+### Features
+
+* add check for updates to tray and fix auto-release workflow ([2069b1a](https://github.com/Gangio-App/for-desktop/commit/2069b1a9d0aa5455f353b0bc2639813d53bdb592))
+* add check for updates to tray and fix auto-release workflow ([482b9a0](https://github.com/Gangio-App/for-desktop/commit/482b9a0fd120f03d28fd04aad36370739515fcf3))
+
+
+### Bug Fixes
+
+* critical startup crash for UI guards ([cf3b818](https://github.com/Gangio-App/for-desktop/commit/cf3b818bdd837a0cd92137029a4aa65ad0c50720))
+* github workflow secrets and expose update-available to renderer ([ce5337d](https://github.com/Gangio-App/for-desktop/commit/ce5337ddacf80800454b2f721d1029753df81559))
+* startup splash screen resilience and safety timer ([6b31e96](https://github.com/Gangio-App/for-desktop/commit/6b31e9659487af0f6807187aaa7ddfaa8ca87b2f))
+* tray menu and startup getting stuck on update check ([301ea36](https://github.com/Gangio-App/for-desktop/commit/301ea36040779ccd047c65f381b4d847c0cc43bd))
+
 ## [1.3.8](https://github.com/Gangio-App/for-desktop/compare/v1.3.7...v1.3.8) (2026-04-04)
 
 ### Bug Fixes
