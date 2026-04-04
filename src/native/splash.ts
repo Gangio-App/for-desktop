@@ -90,21 +90,21 @@ export function createSplashWindow() {
         background: var(--card);
       }
       .logo {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, rgba(124,92,255,0.95), rgba(0,194,255,0.75));
-        box-shadow: 0 12px 30px rgba(124, 92, 255, 0.25);
+        width: 64px;
+        height: 64px;
+        background: url('${windowIconAsset}') no-repeat center center;
+        background-size: contain;
+        filter: drop-shadow(0 12px 24px rgba(124, 92, 255, 0.35));
       }
       .title {
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 700;
         letter-spacing: 0.2px;
         line-height: 1.1;
       }
       .subtitle {
-        margin-top: 2px;
-        font-size: 12px;
+        margin-top: 4px;
+        font-size: 13px;
         color: var(--muted);
       }
       .spacer {
@@ -169,7 +169,7 @@ export function createSplashWindow() {
         <div class="logo"></div>
         <div>
           <div class="title">Gangio</div>
-          <div class="subtitle" id="subtitle">Starting…</div>
+          <div class="subtitle" id="subtitle">Checking for updates…</div>
         </div>
       </div>
 
@@ -232,7 +232,7 @@ export function createSplashWindow() {
         subtitleEl.textContent = message || '…';
       }
 
-      setText('starting', 'Starting…');
+      setText('checking', 'Checking for updates…');
       setProgress(8);
 
       ipcRenderer.on('splash-status', (_evt, payload) => {

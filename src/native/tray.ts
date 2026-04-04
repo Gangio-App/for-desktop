@@ -48,18 +48,7 @@ export function initTray() {
 
 export function updateTrayMenu() {
   const menuItems: any[] = [
-    { label: "Gangio for Desktop", type: "normal", enabled: false },
-    {
-      label: "Version",
-      type: "submenu",
-      submenu: Menu.buildFromTemplate([
-        {
-          label: version,
-          type: "normal",
-          enabled: false,
-        },
-      ]),
-    },
+    { label: `Gangio for Desktop (v${version})`, type: "normal", enabled: false },
     { type: "separator" },
   ];
 

@@ -179,7 +179,7 @@ const config: ForgeConfig = {
   publishers: [
     new PublisherGithub({
       repository: {
-        owner: "gangio",
+        owner: "Gangio-App",
         name: "for-desktop",
       },
     }),

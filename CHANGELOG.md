@@ -1,11 +1,20 @@
 # Changelog
 
-## [1.3.2](https://github.com/gangio/for-desktop/compare/v1.3.1...v1.3.2) (2026-04-04)
+## [1.3.5](https://github.com/Gangio-App/for-desktop/compare/v1.3.2...v1.3.5) (2026-04-04)
 
+### Features
+
+* **Auto-Updater**: Implement Discord-style splash screen updater with progress bar and byte counter.
+* **Branding**: Update all app icons and splash assets to the new premium Gangio logo.
+* **Tray**: Show version prominently in the tray menu.
 
 ### Bug Fixes
 
-* fix app name in notifications (always use Gangio instead of ID).
+* fix repository owner for update checks (Gangio-App).
+* fix tray "Check for Updates" manual trigger.
+* fix notification branding and app ID consistency.
+
+## [1.3.2](https://github.com/Gangio-App/for-desktop/compare/v1.3.1...v1.3.2) (2026-04-04)
 
 ## [1.3.1](https://github.com/gangio/for-desktop/compare/v1.3.0...v1.3.1) (2026-04-04)
 
