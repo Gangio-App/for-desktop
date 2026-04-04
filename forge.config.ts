@@ -41,15 +41,19 @@ const makers: ForgeConfig["makers"] = [
         }),
       ]
     : []),
-  new MakerZIP({}),
-  new MakerDeb({
-    options: {
-      productName: STRINGS.name,
-      productDescription: STRINGS.description,
-      categories: ["Network"],
-      icon: `${ASSET_DIR}/icon.png`,
-    },
-  }),
+  new MakerZIP({}, ["darwin", "win32"]),
+  ...(process.platform === "linux"
+    ? [
+        new MakerDeb({
+          options: {
+            productName: STRINGS.name,
+            productDescription: STRINGS.description,
+            categories: ["Network"],
+            icon: `${ASSET_DIR}/icon.png`,
+          },
+        }),
+      ]
+    : []),
 ];
 
 // skip these makers in CI/CD
