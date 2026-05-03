@@ -26,7 +26,12 @@ function createTrayIcon() {
     resized.setTemplateImage(true);
     return resized;
   } else {
-    return nativeImage.createFromDataURL(trayIconAsset);
+    // Try data URL first, then path as fallback
+    let image = nativeImage.createFromDataURL(trayIconAsset);
+    if (image.isEmpty()) {
+      image = nativeImage.createFromPath(trayIconAsset);
+    }
+    return image;
   }
 }
 

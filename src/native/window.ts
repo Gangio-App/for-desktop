@@ -30,7 +30,10 @@ export const BUILD_URL = new URL(
 let shouldQuit = false;
 
 // load the window icon
-const windowIcon = nativeImage.createFromDataURL(windowIconAsset);
+let windowIcon = nativeImage.createFromDataURL(windowIconAsset);
+if (windowIcon.isEmpty()) {
+  windowIcon = nativeImage.createFromPath(windowIconAsset);
+}
 
 // windowIcon.setTemplateImage(true);
 
