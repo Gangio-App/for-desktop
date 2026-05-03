@@ -1,0 +1,62 @@
+name: Build macOS App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  macos-build:
+    name: macOS Build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout assets
+        run: git -c submodule."assets".update=checkout submodule update --init assets
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate macOS ICNS
+        run: |
+          set -euo pipefail
+          mkdir -p assets/desktop/Gangio.iconset
+          SOURCE_ICON="assets/desktop/icon@3x.png"
+          test -f "$SOURCE_ICON"
+          sips -z 16 16 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_16x16.png
+          sips -z 32 32 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_16x16@2x.png
+          sips -z 32 32 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_32x32.png
+          sips -z 64 64 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_32x32@2x.png
+          sips -z 128 128 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_128x128.png
+          sips -z 256 256 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_128x128@2x.png
+          sips -z 256 256 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_256x256.png
+          sips -z 512 512 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_256x256@2x.png
+          sips -z 512 512 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_512x512.png
+          sips -z 1024 1024 "$SOURCE_ICON" --out assets/desktop/Gangio.iconset/icon_512x512@2x.png
+          iconutil -c icns assets/desktop/Gangio.iconset -o assets/desktop/icon.icns
+          rm -rf assets/desktop/Gangio.iconset
+
+      - name: Make
+        run: pnpm run make
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gangio-macos
+          path: |
+            out/make/zip/darwin/**
+            out/make/zip/macos/**
+            out/make/**/*.dmg
+            out/make/**/*.pkg

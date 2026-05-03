@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Gangio
+Comment=Open source, user-first chat platform
+Exec=gangio-desktop
+Terminal=false
+Type=Application
+Icon=pro.gangio.GangioDesktop
+Categories=Network;InstantMessaging
+StartupWMClass=gangio-desktop
+X-Desktop-File-Install-Version=0.26
+X-Flatpak=pro.gangio.GangioDesktop
