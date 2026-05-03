@@ -75,6 +75,8 @@ const store = new Store({
  */
 class Config {
   sync() {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    
     mainWindow.webContents.send("config", {
       firstLaunch: this.firstLaunch,
       customFrame: this.customFrame,
