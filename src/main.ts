@@ -11,6 +11,13 @@ import { createSplashWindow, sendSplashStatus } from "./native/splash";
 import { initTray, setUpdateStatus } from "./native/tray";
 import { BUILD_URL, createMainWindow, mainWindow } from "./native/window";
 
+import log from "electron-log/main";
+
+// Configure logging
+log.initialize();
+Object.assign(console, log.functions);
+log.info("Gangio starting up...");
+
 // Squirrel-specific logic
 // create/remove shortcuts on Windows when installing / uninstalling
 // we just need to close out of the app immediately
@@ -31,8 +38,7 @@ if (process.defaultApp) {
 
 // Screenshare capture switches must always run, regardless of hw accel setting,
 // because they control DXGI/ScreenCaptureKit capture paths, not rendering.
-app.commandLine.appendSwitch('enable-features', 'DesktopCaptureCrOpWGpu,DesktopCaptureAudioRouter');
-app.commandLine.appendSwitch('disable-features', 'IOSurfaceCapturer');
+app.commandLine.appendSwitch('enable-features', 'DesktopCaptureAudioRouter');
 
 if (!config.hardwareAcceleration) {
   app.disableHardwareAcceleration();
