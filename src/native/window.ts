@@ -30,9 +30,12 @@ export const BUILD_URL = new URL(
 let shouldQuit = false;
 
 // load the window icon
-let windowIcon = nativeImage.createFromDataURL(windowIconAsset);
-if (windowIcon.isEmpty()) {
-  windowIcon = nativeImage.createFromPath(windowIconAsset);
+let windowIcon = nativeImage.createEmpty();
+try {
+  const img = nativeImage.createFromDataURL(windowIconAsset);
+  windowIcon = img.isEmpty() ? nativeImage.createFromPath(windowIconAsset) : img;
+} catch (e) {
+  console.warn("Failed to load window icon:", e);
 }
 
 // windowIcon.setTemplateImage(true);

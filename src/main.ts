@@ -37,9 +37,6 @@ app.commandLine.appendSwitch('disable-features', 'IOSurfaceCapturer');
 if (!config.hardwareAcceleration) {
   app.disableHardwareAcceleration();
 } else {
-  // D3D12→D3D11 bridge: makes GPU-accelerated game frames visible to DXGI capture.
-  // Only safe to set when hw accel is on — setting it while disabled causes crashes.
-  app.commandLine.appendSwitch('use-angle', 'd3d11on12');
   app.commandLine.appendSwitch('force-webrtc-ip-handling-policy', 'disable_non_proxied_udp');
 }
 

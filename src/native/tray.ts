@@ -27,9 +27,12 @@ function createTrayIcon() {
     return resized;
   } else {
     // Try data URL first, then path as fallback
-    let image = nativeImage.createFromDataURL(trayIconAsset);
-    if (image.isEmpty()) {
-      image = nativeImage.createFromPath(trayIconAsset);
+    let image = nativeImage.createEmpty();
+    try {
+      const img = nativeImage.createFromDataURL(trayIconAsset);
+      image = img.isEmpty() ? nativeImage.createFromPath(trayIconAsset) : img;
+    } catch (e) {
+      console.warn("Failed to load tray icon:", e);
     }
     return image;
   }
