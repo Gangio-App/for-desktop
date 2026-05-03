@@ -72,6 +72,8 @@ jobs:
             out/make/**/*.exe
             out/make/**/*.dmg
             out/make/**/*.rpm
+            out/make/**/*.nupkg
+            out/make/**/RELEASES
           draft: true
           generate_release_notes: true
         env:
