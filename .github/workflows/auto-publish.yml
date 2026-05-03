@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
   publish:
@@ -37,7 +36,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Generate macOS ICNS
         if: matrix.os == 'macos-latest'
