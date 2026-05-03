@@ -21,13 +21,7 @@ export type SplashPayload =
     };
 
 export function createSplashWindow() {
-  let windowIcon = nativeImage.createEmpty();
-  try {
-    const img = nativeImage.createFromDataURL(windowIconAsset);
-    windowIcon = img.isEmpty() ? nativeImage.createFromPath(windowIconAsset) : img;
-  } catch (e) {
-    console.warn("Failed to load splash icon:", e);
-  }
+  const windowIcon = nativeImage.createFromDataURL(windowIconAsset);
 
   const splash = new BrowserWindow({
     width: 480,

@@ -33,12 +33,8 @@ if (process.defaultApp) {
 if (!config.hardwareAcceleration) {
   app.disableHardwareAcceleration();
 } else {
-  // Optimize for high-performance voice and video
-  app.commandLine.appendSwitch('enable-features', 'DesktopCaptureCrOpWGpu,DesktopCaptureAudioRouter');
-  app.commandLine.appendSwitch('disable-features', 'IOSurfaceCapturer'); // macOS: forces ScreenCaptureKit path
-  app.commandLine.appendSwitch('use-angle', 'd3d11on12'); // Windows: D3D12→D3D11 bridge, exposes GPU frames
-  app.commandLine.appendSwitch('disable-gpu-sandbox');
-  app.commandLine.appendSwitch('force-webrtc-ip-handling-policy', 'disable_non_proxied_udp');
+  // Optimize for high-performance voice and video (safe flags only)
+  app.commandLine.appendSwitch('enable-features', 'WebRtcHideLocalIpsWithMdns');
 }
 
 // ensure only one copy of the application can run
@@ -197,34 +193,15 @@ if (acquiredLock) {
   });
 
   function bootstrapMainWindow(splash: any, startHidden: boolean) {
-    // Create window hidden so we can transition from splash smoothly
-    createMainWindow({ show: false });
+    // Create and show the main window immediately
+    createMainWindow({ show: !startHidden });
 
-    if (startHidden) return; // Stay hidden (minimise-to-tray mode)
-
-    let shown = false;
-    const showMain = () => {
-      if (shown) return;
-      shown = true;
-      if (splash && !splash.isDestroyed()) {
-        setTimeout(() => {
-          if (!splash.isDestroyed()) splash.close();
-          if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.show();
-            mainWindow.focus();
-          }
-        }, 800);
-      } else if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.show();
-        mainWindow.focus();
-      }
-    };
-
-    // Show when the page signals it's ready
-    mainWindow.once("ready-to-show", showMain);
-
-    // Fallback: if ready-to-show never fires (remote URL), force-show after 10s
-    setTimeout(showMain, 10_000);
+    // Close splash after a brief delay for smooth transition
+    if (splash && !splash.isDestroyed()) {
+      setTimeout(() => {
+        if (!splash.isDestroyed()) splash.close();
+      }, 1200);
+    }
   }
 
   // focus the window if we try to launch again
