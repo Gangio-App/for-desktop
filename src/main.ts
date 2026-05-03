@@ -29,15 +29,18 @@ if (process.defaultApp) {
   app.setAsDefaultProtocolClient("gangio");
 }
 
-// disable hw-accel if so requested
+// Screenshare capture switches must always run, regardless of hw accel setting,
+// because they control DXGI/ScreenCaptureKit capture paths, not rendering.
+app.commandLine.appendSwitch('enable-features', 'DesktopCaptureCrOpWGpu,DesktopCaptureAudioRouter');
+app.commandLine.appendSwitch('disable-features', 'IOSurfaceCapturer');
+
 if (!config.hardwareAcceleration) {
   app.disableHardwareAcceleration();
 } else {
-  // Optimize for high-performance voice and video
-  app.commandLine.appendSwitch("enable-webrtc-hw-encoding");
-  app.commandLine.appendSwitch("enable-webrtc-hw-decoding");
-  app.commandLine.appendSwitch("enable-features", "WebRTCPrioritizeVideoEncoder,WebRtcHideLocalIpsWithMdns");
-  app.commandLine.appendSwitch("force-device-scale-factor", "1"); // Ensure crisp rendering
+  // D3D12→D3D11 bridge: makes GPU-accelerated game frames visible to DXGI capture.
+  // Only safe to set when hw accel is on — setting it while disabled causes crashes.
+  app.commandLine.appendSwitch('use-angle', 'd3d11on12');
+  app.commandLine.appendSwitch('force-webrtc-ip-handling-policy', 'disable_non_proxied_udp');
 }
 
 // ensure only one copy of the application can run
@@ -63,157 +66,157 @@ if (acquiredLock) {
     updateInterval: "1 hour",
   });
 
-    // create and configure the app when electron is ready
-    app.on("ready", () => {
-      const startHidden =
-        app.commandLine.hasSwitch("hidden") || config.startMinimisedToTray;
- 
-      // Show splash only when we're going to show the main window.
-      const splash = startHidden ? undefined : createSplashWindow();
-      sendSplashStatus(splash, { phase: "starting", message: "Starting…" });
- 
-      const { autoUpdater } = require("electron");
- 
-      // Safety timer: if update check takes more than 5 seconds, bootstrap anyway
-      let safetyTimer: NodeJS.Timeout | undefined;
-      if (!startHidden) {
-        safetyTimer = setTimeout(() => {
-          if (!mainWindow || mainWindow.isDestroyed()) {
-            console.log("Update check timed out, launching...");
-            setUpdateStatus("none");
-            bootstrapMainWindow(splash, startHidden);
-          }
-        }, 5000);
-      }
- 
-      autoUpdater.on("checking-for-update", () => {
-        sendSplashStatus(splash, {
-          phase: "checking",
-          message: "Checking for updates…",
-        });
-      });
- 
-      autoUpdater.on("update-available", () => {
-        if (safetyTimer) clearTimeout(safetyTimer);
-        sendSplashStatus(splash, {
-          phase: "update-available",
-          message: "Update found. Downloading…",
-        });
-        setUpdateStatus("downloading");
-      });
- 
-      autoUpdater.on("download-progress", (progress: any) => {
-        const percent =
-          typeof progress?.percent === "number" ? progress.percent : undefined;
- 
-        sendSplashStatus(splash, {
-          phase: "downloading",
-          message: "Downloading update…",
-          percent,
-          transferred:
-            typeof progress?.transferred === "number"
-              ? progress.transferred
-              : undefined,
-          total: typeof progress?.total === "number" ? progress.total : undefined,
-        });
-      });
- 
-      autoUpdater.on(
-        "update-downloaded",
-        (_event: any, _releaseNotes: any, releaseName: string) => {
-          setUpdateStatus("ready");
-          mainWindow?.webContents.send("update-ready", { releaseName });
-          sendSplashStatus(splash, {
-            phase: "ready",
-            message: "Update ready. Restarting…",
-          });
- 
-          const notification = new Notification({
-            title: "Update Ready",
-            body: "Restart Gangio to apply the update.",
-          });
-          notification.show();
-          
-          // Re-launch app for update
-          if (splash && !splash.isDestroyed()) {
-             setTimeout(() => autoUpdater.quitAndInstall(), 1500);
-          }
-        },
-      );
- 
-      autoUpdater.on("update-not-available", () => {
-        if (typeof safetyTimer !== 'undefined') clearTimeout(safetyTimer);
-        setUpdateStatus("none");
-        sendSplashStatus(splash, {
-          phase: "starting",
-          message: "All good! Launching…",
-        });
-        
+  // create and configure the app when electron is ready
+  app.on("ready", () => {
+    const startHidden =
+      app.commandLine.hasSwitch("hidden") || config.startMinimisedToTray;
+
+    // Show splash only when we're going to show the main window.
+    const splash = startHidden ? undefined : createSplashWindow();
+    sendSplashStatus(splash, { phase: "starting", message: "Starting…" });
+
+    const { autoUpdater } = require("electron");
+
+    // Safety timer: if update check takes more than 5 seconds, bootstrap anyway
+    let safetyTimer: NodeJS.Timeout | undefined;
+    if (!startHidden) {
+      safetyTimer = setTimeout(() => {
         if (!mainWindow || mainWindow.isDestroyed()) {
-           bootstrapMainWindow(splash, startHidden);
+          console.log("Update check timed out, launching...");
+          setUpdateStatus("none");
+          bootstrapMainWindow(splash, startHidden);
         }
+      }, 5000);
+    }
+
+    autoUpdater.on("checking-for-update", () => {
+      sendSplashStatus(splash, {
+        phase: "checking",
+        message: "Checking for updates…",
       });
- 
-      autoUpdater.on("error", (err: unknown) => {
-        if (safetyTimer) clearTimeout(safetyTimer);
+    });
+
+    autoUpdater.on("update-available", () => {
+      if (safetyTimer) clearTimeout(safetyTimer);
+      sendSplashStatus(splash, {
+        phase: "update-available",
+        message: "Update found. Downloading…",
+      });
+      setUpdateStatus("downloading");
+    });
+
+    autoUpdater.on("download-progress", (progress: any) => {
+      const percent =
+        typeof progress?.percent === "number" ? progress.percent : undefined;
+
+      sendSplashStatus(splash, {
+        phase: "downloading",
+        message: "Downloading update…",
+        percent,
+        transferred:
+          typeof progress?.transferred === "number"
+            ? progress.transferred
+            : undefined,
+        total: typeof progress?.total === "number" ? progress.total : undefined,
+      });
+    });
+
+    autoUpdater.on(
+      "update-downloaded",
+      (_event: any, _releaseNotes: any, releaseName: string) => {
+        setUpdateStatus("ready");
+        mainWindow?.webContents.send("update-ready", { releaseName });
         sendSplashStatus(splash, {
-          phase: "error",
-          message: "Update error. Starting normally…",
+          phase: "ready",
+          message: "Update ready. Restarting…",
         });
-        console.error("AutoUpdater error", err);
-        
-        if (!mainWindow || mainWindow.isDestroyed()) {
-           bootstrapMainWindow(splash, startHidden);
+
+        const notification = new Notification({
+          title: "Update Ready",
+          body: "Restart Gangio to apply the update.",
+        });
+        notification.show();
+
+        // Re-launch app for update
+        if (splash && !splash.isDestroyed()) {
+          setTimeout(() => autoUpdater.quitAndInstall(), 1500);
         }
+      },
+    );
+
+    autoUpdater.on("update-not-available", () => {
+      if (typeof safetyTimer !== 'undefined') clearTimeout(safetyTimer);
+      setUpdateStatus("none");
+      sendSplashStatus(splash, {
+        phase: "starting",
+        message: "All good! Launching…",
       });
- 
-      // Start the update scan
-      setUpdateStatus("checking");
-      try {
-        autoUpdater.checkForUpdates();
-      } catch (e) {
-        if (safetyTimer) clearTimeout(safetyTimer);
-        console.error("Manual update check failed", e);
-        setUpdateStatus("none");
+
+      if (!mainWindow || mainWindow.isDestroyed()) {
         bootstrapMainWindow(splash, startHidden);
       }
- 
-      // enable auto start on Windows and MacOS
-      if (config.firstLaunch) {
-        if (process.platform === "win32" || process.platform === "darwin") {
-          autoLaunch.enable();
-        }
-        config.firstLaunch = false;
-      }
- 
-      // Setup UI/Tray
-      initTray();
-      initDiscordRpc("Gangio");
- 
-      // Fix for notifications
-      app.name = "Gangio";
-      app.setAppUserModelId("Gangio");
     });
- 
-    function bootstrapMainWindow(splash: any, startHidden: boolean) {
-      createMainWindow({ show: startHidden ? false : false });
- 
-      // Once the main window has rendered, show it and close splash.
-      if (!startHidden) {
-        mainWindow.once("ready-to-show", () => {
-          if (splash && !splash.isDestroyed()) {
-             setTimeout(() => {
-                if (!splash.isDestroyed()) splash.close();
-                mainWindow.show();
-                mainWindow.focus();
-             }, 800); // Give some time for the "Launching" message to be seen
-          } else {
+
+    autoUpdater.on("error", (err: unknown) => {
+      if (safetyTimer) clearTimeout(safetyTimer);
+      sendSplashStatus(splash, {
+        phase: "error",
+        message: "Update error. Starting normally…",
+      });
+      console.error("AutoUpdater error", err);
+
+      if (!mainWindow || mainWindow.isDestroyed()) {
+        bootstrapMainWindow(splash, startHidden);
+      }
+    });
+
+    // Start the update scan
+    setUpdateStatus("checking");
+    try {
+      autoUpdater.checkForUpdates();
+    } catch (e) {
+      if (safetyTimer) clearTimeout(safetyTimer);
+      console.error("Manual update check failed", e);
+      setUpdateStatus("none");
+      bootstrapMainWindow(splash, startHidden);
+    }
+
+    // enable auto start on Windows and MacOS
+    if (config.firstLaunch) {
+      if (process.platform === "win32" || process.platform === "darwin") {
+        autoLaunch.enable();
+      }
+      config.firstLaunch = false;
+    }
+
+    // Setup UI/Tray
+    initTray();
+    initDiscordRpc("Gangio");
+
+    // Fix for notifications
+    app.name = "Gangio";
+    app.setAppUserModelId("Gangio");
+  });
+
+  function bootstrapMainWindow(splash: any, startHidden: boolean) {
+    createMainWindow({ show: startHidden ? false : false });
+
+    // Once the main window has rendered, show it and close splash.
+    if (!startHidden) {
+      mainWindow.once("ready-to-show", () => {
+        if (splash && !splash.isDestroyed()) {
+          setTimeout(() => {
+            if (!splash.isDestroyed()) splash.close();
             mainWindow.show();
             mainWindow.focus();
-          }
-        });
-      }
+          }, 800); // Give some time for the "Launching" message to be seen
+        } else {
+          mainWindow.show();
+          mainWindow.focus();
+        }
+      });
     }
+  }
 
   // focus the window if we try to launch again
   app.on("second-instance", () => {
