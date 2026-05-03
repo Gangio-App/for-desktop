@@ -11,13 +11,6 @@ import { createSplashWindow, sendSplashStatus } from "./native/splash";
 import { initTray, setUpdateStatus } from "./native/tray";
 import { BUILD_URL, createMainWindow, mainWindow } from "./native/window";
 
-import log from "electron-log/main";
-
-// Configure logging
-log.initialize();
-Object.assign(console, log.functions);
-log.info("Gangio starting up...");
-
 // Squirrel-specific logic
 // create/remove shortcuts on Windows when installing / uninstalling
 // we just need to close out of the app immediately
@@ -36,13 +29,15 @@ if (process.defaultApp) {
   app.setAsDefaultProtocolClient("gangio");
 }
 
-// Screenshare capture switches must always run, regardless of hw accel setting,
-// because they control DXGI/ScreenCaptureKit capture paths, not rendering.
-app.commandLine.appendSwitch('enable-features', 'DesktopCaptureAudioRouter');
-
+// disable hw-accel if so requested
 if (!config.hardwareAcceleration) {
   app.disableHardwareAcceleration();
 } else {
+  // Optimize for high-performance voice and video
+  app.commandLine.appendSwitch('enable-features', 'DesktopCaptureCrOpWGpu,DesktopCaptureAudioRouter');
+  app.commandLine.appendSwitch('disable-features', 'IOSurfaceCapturer'); // macOS: forces ScreenCaptureKit path
+  app.commandLine.appendSwitch('use-angle', 'd3d11on12'); // Windows: D3D12→D3D11 bridge, exposes GPU frames
+  app.commandLine.appendSwitch('disable-gpu-sandbox');
   app.commandLine.appendSwitch('force-webrtc-ip-handling-policy', 'disable_non_proxied_udp');
 }
 
@@ -202,23 +197,34 @@ if (acquiredLock) {
   });
 
   function bootstrapMainWindow(splash: any, startHidden: boolean) {
-    createMainWindow({ show: startHidden ? false : false });
+    // Create window hidden so we can transition from splash smoothly
+    createMainWindow({ show: false });
 
-    // Once the main window has rendered, show it and close splash.
-    if (!startHidden) {
-      mainWindow.once("ready-to-show", () => {
-        if (splash && !splash.isDestroyed()) {
-          setTimeout(() => {
-            if (!splash.isDestroyed()) splash.close();
+    if (startHidden) return; // Stay hidden (minimise-to-tray mode)
+
+    let shown = false;
+    const showMain = () => {
+      if (shown) return;
+      shown = true;
+      if (splash && !splash.isDestroyed()) {
+        setTimeout(() => {
+          if (!splash.isDestroyed()) splash.close();
+          if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.show();
             mainWindow.focus();
-          }, 800); // Give some time for the "Launching" message to be seen
-        } else {
-          mainWindow.show();
-          mainWindow.focus();
-        }
-      });
-    }
+          }
+        }, 800);
+      } else if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    };
+
+    // Show when the page signals it's ready
+    mainWindow.once("ready-to-show", showMain);
+
+    // Fallback: if ready-to-show never fires (remote URL), force-show after 10s
+    setTimeout(showMain, 10_000);
   }
 
   // focus the window if we try to launch again
