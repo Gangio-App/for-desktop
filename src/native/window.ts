@@ -11,7 +11,7 @@ import {
   Notification,
 } from "electron";
 
-import windowIconAsset from "../../assets/desktop/icon.png?asset";
+import windowIconAsset from "../../assets/desktop/hicolor/512x512.png?asset";
 
 import { config } from "./config";
 import { updateTrayMenu } from "./tray";
