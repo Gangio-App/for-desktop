@@ -1,6 +1,5 @@
 import { BrowserWindow, nativeImage } from "electron";
 
-import wordmarkAsset from "../../assets/desktop/wordmark.svg?asset";
 import windowIconAsset from "../../assets/desktop/hicolor/512x512.png?asset";
 
 export type SplashPhase =
@@ -9,7 +8,8 @@ export type SplashPhase =
   | "update-available"
   | "downloading"
   | "ready"
-  | "error";
+  | "error"
+  | "offline";
 
 export type SplashPayload =
   | { phase: SplashPhase; message?: string }
@@ -19,6 +19,11 @@ export type SplashPayload =
       percent?: number;
       transferred?: number;
       total?: number;
+    }
+  | {
+      phase: "offline";
+      message?: string;
+      retryIn?: number;
     };
 
 export function createSplashWindow() {
@@ -105,12 +110,103 @@ export function createSplashWindow() {
         width: 100%;
       }
       .logo {
-        width: 180px;
-        height: 60px;
-        background: url('${wordmarkAsset}') no-repeat center center;
-        background-size: contain;
-        filter: invert(1) brightness(2); /* Make it white */
+        width: 200px;
+        height: 72px;
+        color: #ffffff;
+        display: block;
       }
+      .logo svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      /* All animated letters share these origin rules so squash/scale
+         pivots from the bottom-center of the glyph (like a ball landing). */
+      #i-dot, #l-g1, #l-a, #l-n, #l-g2, #l-i {
+        transform-box: fill-box;
+      }
+      #i-dot { transform-origin: 50% 50%; }
+      #l-g1, #l-a, #l-n, #l-g2, #l-i { transform-origin: 50% 100%; }
+
+      /* Dot pixel offsets are tuned for the 200px-wide rendered SVG.
+         Sequence: starts on first 'g' -> a -> n -> second 'g' -> stops on 'i'. */
+      #i-dot {
+        animation: dotJump 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        animation-fill-mode: both;
+      }
+      #l-g1 { animation: squashG1 5s ease-out infinite; transform-origin: 18% 100%; }
+      #l-a  { animation: squashA  5s ease-out infinite; transform-origin: 38% 100%; }
+      #l-n  { animation: squashN  5s ease-out infinite; transform-origin: 50% 100%; }
+      #l-g2 { animation: squashG2 5s ease-out infinite; transform-origin: 65% 100%; }
+      #l-i  { animation: squashI  5s ease-out infinite; transform-origin: 80% 100%; }
+
+      @keyframes dotJump {
+        /* Tight swoop entrance from upper-left */
+        0%   { transform: translate(-168px, -22px) scale(0.85); opacity: 0; }
+        3%   { transform: translate(-152px, -14px) scale(0.95); opacity: 1; }
+        /* Land on first 'g' */
+        5%   { transform: translate(-138px, 0) scale(1); }
+        7%   { transform: translate(-138px, 1px) scaleX(1.25) scaleY(0.75); }
+        9%   { transform: translate(-138px, 0) scale(1); }
+        /* Arc to 'a' */
+        12%  { transform: translate(-122px, -16px) scale(1); }
+        16%  { transform: translate(-103px, 0); }
+        18%  { transform: translate(-103px, 1px) scaleX(1.25) scaleY(0.75); }
+        21%  { transform: translate(-103px, 0) scale(1); }
+        /* Arc to 'n' */
+        25%  { transform: translate(-87px, -16px); }
+        30%  { transform: translate(-72px, 0); }
+        33%  { transform: translate(-72px, 1px) scaleX(1.25) scaleY(0.75); }
+        36%  { transform: translate(-72px, 0) scale(1); }
+        /* Arc to second 'g' */
+        40%  { transform: translate(-52px, -16px); }
+        45%  { transform: translate(-32px, 0); }
+        48%  { transform: translate(-32px, 1px) scaleX(1.25) scaleY(0.75); }
+        51%  { transform: translate(-32px, 0) scale(1); }
+        /* Arc to 'i' (home) and stop */
+        55%  { transform: translate(-16px, -14px); }
+        60%  { transform: translate(0, 0); }
+        63%  { transform: translate(0, 1px) scaleX(1.2) scaleY(0.8); }
+        66%  { transform: translate(0, 0) scale(1); }
+        /* Rest on i for the rest of the cycle */
+        78%  { transform: translate(0, 0) rotate(0deg); }
+        /* Spin back home to first 'g' to loop */
+        90%  { transform: translate(-70px, -34px) rotate(220deg); }
+        100% { transform: translate(-138px, 0) rotate(360deg) scale(1); }
+      }
+
+      /* Letter warps fire exactly when the dot lands on them. */
+      @keyframes squashG1 {
+        0%, 4% { transform: translate(0, 0) scale(1); }
+        5%   { transform: translate(0, 3px) scaleY(0.86) scaleX(1.12); }
+        10%  { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+      @keyframes squashA {
+        0%, 14% { transform: translate(0, 0) scale(1); }
+        15% { transform: translate(0, 3px) scaleY(0.86) scaleX(1.12); }
+        20% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+      @keyframes squashN {
+        0%, 29% { transform: translate(0, 0) scale(1); }
+        30% { transform: translate(0, 3px) scaleY(0.86) scaleX(1.12); }
+        35% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+      @keyframes squashG2 {
+        0%, 44% { transform: translate(0, 0) scale(1); }
+        45% { transform: translate(0, 3px) scaleY(0.86) scaleX(1.12); }
+        50% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+      @keyframes squashI {
+        0%, 59% { transform: translate(0, 0) scale(1); }
+        60% { transform: translate(0, 2px) scaleY(0.9) scaleX(1.08); }
+        65% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+
       .status-container {
         width: 100%;
         max-width: 320px;
@@ -164,7 +260,19 @@ export function createSplashWindow() {
     <div class="wrap">
       <div class="drag"></div>
       <div class="content">
-        <div class="logo"></div>
+        <div class="logo" aria-label="Gangio">
+          <svg viewBox="0 0 273.18 98.44" xmlns="http://www.w3.org/2000/svg">
+            <g id="l-g1"><path d="M28.23,73.83h-10.55c-9.38,0-12.81-4.69-10.3-14.06l6.61-24.61c2.51-9.38,8.45-14.06,17.82-14.06h28.12l-16.95,63.28c-2.53,9.38-8.48,14.06-17.86,14.06H11.07c-9.37,0-12.8-4.69-10.27-14.06l1.86-7.03H20.25l-.95,3.52h7.03l1.9-7.03Zm-2.32-17.58h7.03l4.71-17.58h-7.03l-4.71,17.58Z" fill="currentColor"/></g>
+            <g id="l-a"><path d="M92.39,77.34h-28.12c-9.38,0-12.81-4.69-10.3-14.06l7.56-28.12c2.51-9.38,8.45-14.06,17.82-14.06h28.12l-15.08,56.25Zm-7.21-38.67h-7.03l-5.66,21.09h7.03l5.66-21.09Z" fill="currentColor"/></g>
+            <g id="l-n"><path d="M141.47,77.34h-17.58l10.37-38.67h-7.03l-10.37,38.67h-17.58l15.08-56.25h28.12c9.38,0,12.81,4.69,10.3,14.06l-11.32,42.19Z" fill="currentColor"/></g>
+            <g id="l-g2"><path d="M172.34,73.83h-10.55c-9.38,0-12.81-4.69-10.3-14.06l6.61-24.61c2.51-9.38,8.45-14.06,17.82-14.06h28.12l-16.95,63.28c-2.53,9.38-8.48,14.06-17.86,14.06h-14.06c-9.37,0-12.8-4.69-10.27-14.06l1.86-7.03h17.58l-.95,3.52h7.03l1.9-7.03Zm-2.32-17.58h7.03l4.71-17.58h-7.03l-4.71,17.58Z" fill="currentColor"/></g>
+            <g id="l-i"><path d="M228.58,21.09l-15.08,56.25h-17.58l15.08-56.25h17.58Z" fill="currentColor"/></g>
+            <g id="i-dot">
+              <path d="M230.99,2.56c1.25,1.71,1.55,3.79,.9,6.22-.66,2.44-2.07,4.51-4.24,6.22-2.17,1.71-4.47,2.57-6.91,2.57s-4.28-.86-5.54-2.57c-1.25-1.71-1.55-3.79-.9-6.22,.66-2.44,2.07-4.51,4.24-6.22,2.17-1.71,4.47-2.57,6.91-2.57s4.28,.86,5.54,2.57Z" fill="currentColor"/>
+            </g>
+            <path d="M222.64,63.28l7.56-28.12c2.51-9.38,8.45-14.06,17.82-14.06h14.06c9.37,0,12.81,4.69,10.3,14.06l-7.56,28.12c-2.51,9.38-8.45,14.06-17.82,14.06h-14.06c-9.38,0-12.81-4.69-10.3-14.06Zm24.19-24.61l-5.66,21.09h7.03l5.66-21.09h-7.03Z" fill="currentColor"/>
+          </svg>
+        </div>
         <div class="status-container">
           <div class="subtitle" id="subtitle">Checking for updates...</div>
           <div class="bar-container">
@@ -181,6 +289,7 @@ export function createSplashWindow() {
       const subtitleEl = document.getElementById('subtitle');
       const fillEl = document.getElementById('fill');
       const metaEl = document.getElementById('meta');
+      const barContainerEl = document.querySelector('.bar-container');
 
       const phaseLabel = (p) => {
         switch (p) {
@@ -190,6 +299,7 @@ export function createSplashWindow() {
           case 'downloading': return 'Downloading';
           case 'ready': return 'Ready';
           case 'error': return 'Error';
+          case 'offline': return 'Offline';
           default: return 'Status';
         }
       };
@@ -217,6 +327,21 @@ export function createSplashWindow() {
 
       ipcRenderer.on('splash-status', (_evt, payload) => {
         const phase = payload?.phase || 'starting';
+
+        // Hide the progress bar entirely for the offline/retry state so it
+        // visually matches the screenshot reference (logo + status text only).
+        if (barContainerEl) {
+          barContainerEl.style.display = phase === 'offline' ? 'none' : '';
+        }
+
+        if (phase === 'offline') {
+          const secs = typeof payload?.retryIn === 'number' ? payload.retryIn : 5;
+          subtitleEl.textContent = payload?.message
+            || ('Update failed \u2014 retrying in ' + secs + ' sec\u2026');
+          metaEl.textContent = '';
+          return;
+        }
+
         setText(phase, payload?.message);
 
         if (phase === 'downloading') {

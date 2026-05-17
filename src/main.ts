@@ -1,3 +1,4 @@
+import dns from "node:dns/promises";
 import { join } from "node:path";
 import { IUpdateInfo, UpdateSourceType, updateElectronApp } from "update-electron-app";
 
@@ -71,17 +72,141 @@ if (acquiredLock) {
 
     const { autoUpdater } = require("electron");
 
-    // Safety timer: if update check takes more than 5 seconds, bootstrap anyway
+    // Timers shared by the update flow. The safety timer guards against the
+    // updater hanging once a check has been issued; the retry timer drives
+    // the visible offline countdown shown on the splash.
     let safetyTimer: NodeJS.Timeout | undefined;
-    if (!startHidden) {
-      safetyTimer = setTimeout(() => {
-        if (!mainWindow || mainWindow.isDestroyed()) {
-          console.log("Update check timed out, launching...");
-          setUpdateStatus("none");
-          bootstrapMainWindow(splash, startHidden);
+    let retryCountdownTimer: NodeJS.Timeout | undefined;
+    let isRetryingOffline = false;
+    let hasBootstrapped = false;
+
+    const clearSafetyTimer = () => {
+      if (safetyTimer) {
+        clearTimeout(safetyTimer);
+        safetyTimer = undefined;
+      }
+    };
+
+    const clearRetryTimer = () => {
+      if (retryCountdownTimer) {
+        clearInterval(retryCountdownTimer);
+        retryCountdownTimer = undefined;
+      }
+      isRetryingOffline = false;
+    };
+
+    const clearAllTimers = () => {
+      clearSafetyTimer();
+      clearRetryTimer();
+    };
+
+    const bootstrapOnce = () => {
+      if (hasBootstrapped) return;
+      hasBootstrapped = true;
+      clearAllTimers();
+      bootstrapMainWindow(splash, startHidden);
+    };
+
+    // Connectivity preflight: a quick DNS lookup against the update host.
+    // Falls back to github.com so corporate DNS that rejects unknown hosts
+    // still gets a chance to confirm we have a working internet connection.
+    const isOnline = async (): Promise<boolean> => {
+      const hosts = ["update.electronjs.org", "github.com"];
+      for (const host of hosts) {
+        try {
+          await dns.lookup(host);
+          return true;
+        } catch {
+          // try next host
         }
-      }, 5000);
-    }
+      }
+      return false;
+    };
+
+    const RETRY_SECONDS = 5;
+
+    const scheduleOfflineRetry = () => {
+      // If we can't show a splash (hidden launch) there's nothing to count
+      // down on, so just bootstrap and let the in-app updater retry later.
+      if (!splash || splash.isDestroyed()) {
+        bootstrapOnce();
+        return;
+      }
+      if (isRetryingOffline) return;
+
+      clearAllTimers();
+      isRetryingOffline = true;
+      setUpdateStatus("none");
+
+      let seconds = RETRY_SECONDS;
+      sendSplashStatus(splash, {
+        phase: "offline",
+        message: `Update failed \u2014 retrying in ${seconds} sec\u2026`,
+        retryIn: seconds,
+      });
+
+      retryCountdownTimer = setInterval(() => {
+        seconds -= 1;
+        if (seconds <= 0) {
+          clearRetryTimer();
+          void startUpdateCheck();
+          return;
+        }
+        sendSplashStatus(splash, {
+          phase: "offline",
+          message: `Update failed \u2014 retrying in ${seconds} sec\u2026`,
+          retryIn: seconds,
+        });
+      }, 1000);
+    };
+
+    const startUpdateCheck = async () => {
+      if (hasBootstrapped) return;
+
+      // Preflight: don't even try the updater while offline; just show the
+      // countdown on the splash and retry once the timer elapses.
+      const online = await isOnline();
+      if (!online) {
+        scheduleOfflineRetry();
+        return;
+      }
+
+      sendSplashStatus(splash, {
+        phase: "checking",
+        message: "Checking for updates…",
+      });
+      setUpdateStatus("checking");
+
+      // Safety timer only starts once we've actually issued a check: if the
+      // updater stalls for >5s while we *do* have connectivity, fall through
+      // to launching the app normally.
+      clearSafetyTimer();
+      if (!startHidden) {
+        safetyTimer = setTimeout(() => {
+          if (!mainWindow || mainWindow.isDestroyed()) {
+            console.log("Update check timed out, launching...");
+            setUpdateStatus("none");
+            bootstrapOnce();
+          }
+        }, 5000);
+      }
+
+      try {
+        autoUpdater.checkForUpdates();
+      } catch (e) {
+        clearSafetyTimer();
+        console.error("Manual update check failed", e);
+        // If connectivity dropped between preflight and the call, treat it
+        // as an offline failure and retry instead of opening the window.
+        const stillOnline = await isOnline();
+        if (!stillOnline) {
+          scheduleOfflineRetry();
+        } else {
+          setUpdateStatus("none");
+          bootstrapOnce();
+        }
+      }
+    };
 
     autoUpdater.on("checking-for-update", () => {
       sendSplashStatus(splash, {
@@ -91,7 +216,8 @@ if (acquiredLock) {
     });
 
     autoUpdater.on("update-available", () => {
-      if (safetyTimer) clearTimeout(safetyTimer);
+      clearSafetyTimer();
+      clearRetryTimer();
       sendSplashStatus(splash, {
         phase: "update-available",
         message: "Update found. Downloading…",
@@ -118,6 +244,7 @@ if (acquiredLock) {
     autoUpdater.on(
       "update-downloaded",
       (_event: any, _releaseNotes: any, releaseName: string) => {
+        clearAllTimers();
         setUpdateStatus("ready");
         mainWindow?.webContents.send("update-ready", { releaseName });
         sendSplashStatus(splash, {
@@ -139,7 +266,7 @@ if (acquiredLock) {
     );
 
     autoUpdater.on("update-not-available", () => {
-      if (typeof safetyTimer !== 'undefined') clearTimeout(safetyTimer);
+      clearAllTimers();
       setUpdateStatus("none");
       sendSplashStatus(splash, {
         phase: "starting",
@@ -147,33 +274,37 @@ if (acquiredLock) {
       });
 
       if (!mainWindow || mainWindow.isDestroyed()) {
-        bootstrapMainWindow(splash, startHidden);
+        bootstrapOnce();
       }
     });
 
-    autoUpdater.on("error", (err: unknown) => {
-      if (safetyTimer) clearTimeout(safetyTimer);
+    autoUpdater.on("error", async (err: unknown) => {
+      clearSafetyTimer();
+      console.error("AutoUpdater error", err);
+
+      // If we already shipped the main window we don't want to disturb the
+      // user — let the next scheduled update-electron-app tick handle it.
+      if (hasBootstrapped) return;
+
+      // If the failure is just because we're offline, stay on the splash and
+      // retry instead of falling through to launching the app.
+      const stillOnline = await isOnline();
+      if (!stillOnline) {
+        scheduleOfflineRetry();
+        return;
+      }
+
       sendSplashStatus(splash, {
         phase: "error",
         message: "Update error. Starting normally…",
       });
-      console.error("AutoUpdater error", err);
-
       if (!mainWindow || mainWindow.isDestroyed()) {
-        bootstrapMainWindow(splash, startHidden);
+        bootstrapOnce();
       }
     });
 
-    // Start the update scan
-    setUpdateStatus("checking");
-    try {
-      autoUpdater.checkForUpdates();
-    } catch (e) {
-      if (safetyTimer) clearTimeout(safetyTimer);
-      console.error("Manual update check failed", e);
-      setUpdateStatus("none");
-      bootstrapMainWindow(splash, startHidden);
-    }
+    // Kick off the (possibly retrying) update flow.
+    void startUpdateCheck();
 
     // enable auto start on Windows and MacOS
     if (config.firstLaunch) {
