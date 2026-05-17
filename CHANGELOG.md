@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.0](https://github.com/Gangio-App/for-desktop/compare/v1.3.0...v1.4.0) (2026-05-17)
+
+
+### Features
+
+* add automatic file logging and startup safety patch ([b9eeee4](https://github.com/Gangio-App/for-desktop/commit/b9eeee4c4ce711e6f3bff1fb079ae7c27740437a))
+* ultra-high performance gaming capture & stability fixes ([82b7584](https://github.com/Gangio-App/for-desktop/commit/82b758477ed80e2004b9ec47ee1ac46dd4a05e2b))
+
+
+### Bug Fixes
+
+* add manual trigger for build ([605777d](https://github.com/Gangio-App/for-desktop/commit/605777da417ee827da2e638bd7fa67823ac2b74c))
+* ignore frozen lockfile in CI ([dc18698](https://github.com/Gangio-App/for-desktop/commit/dc186984fef9cf9f5862d5516672dcd3aae3ab4c))
+* include squirrel update files for windows ([2ec3a65](https://github.com/Gangio-App/for-desktop/commit/2ec3a657f590ec10ab5985c87e4936907a95bfa0))
+* include squirrel update files for windows ([62c5e59](https://github.com/Gangio-App/for-desktop/commit/62c5e596b48879c20f3f07b7d313241877c22fce))
+* macOS icon generation format ([73537f7](https://github.com/Gangio-App/for-desktop/commit/73537f77318e4d838e6a9bddce49bd34c0bc81f2))
+* prevent startup crash when syncing config ([d25695c](https://github.com/Gangio-App/for-desktop/commit/d25695c1230eb01efaabfbcb22b56cf8c573ae70))
+* resolve background hang and startup crash loop ([72ef36b](https://github.com/Gangio-App/for-desktop/commit/72ef36b0c98d46d33a50375c23e625d643cea688))
+* restore corrupted windows icon file ([89ac341](https://github.com/Gangio-App/for-desktop/commit/89ac341cde47eedc81f4a76a7c46c3d0ebb2fd0e))
+* restore missing tray icon with robust loading ([d9293fd](https://github.com/Gangio-App/for-desktop/commit/d9293fd030a285550a310c86e65026eb123eef5f))
+* show main window immediately, remove unsafe GPU flags ([f33a1a8](https://github.com/Gangio-App/for-desktop/commit/f33a1a83d72ba3fcdf2e62bb30b312f5213a3c10))
+* use --no-frozen-lockfile in all CI workflows ([8650266](https://github.com/Gangio-App/for-desktop/commit/8650266fe814b7ab556484d8db0249a662e19b18))
+* window not visible after splash & CI lockfile error ([66c82a0](https://github.com/Gangio-App/for-desktop/commit/66c82a0026331447fb3108e238d995375fd57716))
+
 ## [1.3.8](https://github.com/Gangio-App/for-desktop/compare/v1.3.7...v1.3.8) (2026-04-04)
 
 ### Bug Fixes
