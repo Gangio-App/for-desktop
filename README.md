@@ -12,7 +12,7 @@
 
 The official desktop client for **Gangio** — chat, voice, and communities for Windows, macOS, and Linux.
 
-<img src="https://raw.githubusercontent.com/Gangio-App/for-web/main/packages/client/assets/web/landing/desktop-screenshot.png" alt="Gangio Desktop screenshot" width="820" />
+<img src="https://gangio.pro/assets/desktop-screenshot-Cz38KOLx.png" alt="Gangio Desktop screenshot" width="820" />
 
 </div>
 <br/>
