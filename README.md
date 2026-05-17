@@ -1,25 +1,32 @@
 <div align="center">
 <h1>
-  Stoat for Desktop
+  Gangio for Desktop
   
-  [![Stars](https://img.shields.io/github/stars/stoatchat/for-desktop?style=flat-square&logoColor=white)](https://github.com/stoatchat/for-desktop/stargazers)
-  [![Forks](https://img.shields.io/github/forks/stoatchat/for-desktop?style=flat-square&logoColor=white)](https://github.com/stoatchat/for-desktop/network/members)
-  [![Pull Requests](https://img.shields.io/github/issues-pr/stoatchat/for-desktop?style=flat-square&logoColor=white)](https://github.com/stoatchat/for-desktop/pulls)
-  [![Issues](https://img.shields.io/github/issues/stoatchat/for-desktop?style=flat-square&logoColor=white)](https://github.com/stoatchat/for-desktop/issues)
-  [![Contributors](https://img.shields.io/github/contributors/stoatchat/for-desktop?style=flat-square&logoColor=white)](https://github.com/stoatchat/for-desktop/graphs/contributors)
-  [![License](https://img.shields.io/github/license/stoatchat/for-desktop?style=flat-square&logoColor=white)](https://github.com/stoatchat/for-desktop/blob/main/LICENSE)
+  [![Stars](https://img.shields.io/github/stars/Gangio-App/for-desktop?style=flat-square&logoColor=white)](https://github.com/Gangio-App/for-desktop/stargazers)
+  [![Forks](https://img.shields.io/github/forks/Gangio-App/for-desktop?style=flat-square&logoColor=white)](https://github.com/Gangio-App/for-desktop/network/members)
+  [![Pull Requests](https://img.shields.io/github/issues-pr/Gangio-App/for-desktop?style=flat-square&logoColor=white)](https://github.com/Gangio-App/for-desktop/pulls)
+  [![Issues](https://img.shields.io/github/issues/Gangio-App/for-desktop?style=flat-square&logoColor=white)](https://github.com/Gangio-App/for-desktop/issues)
+  [![Contributors](https://img.shields.io/github/contributors/Gangio-App/for-desktop?style=flat-square&logoColor=white)](https://github.com/Gangio-App/for-desktop/graphs/contributors)
+  [![License](https://img.shields.io/github/license/Gangio-App/for-desktop?style=flat-square&logoColor=white)](https://github.com/Gangio-App/for-desktop/blob/main/LICENSE)
 </h1>
-Application for Windows, macOS, and Linux.
+
+The official desktop client for **Gangio** — chat, voice, and communities for Windows, macOS, and Linux.
+
+<img src="https://raw.githubusercontent.com/Gangio-App/for-web/main/packages/client/assets/web/landing/desktop-screenshot.png" alt="Gangio Desktop screenshot" width="820" />
+
 </div>
 <br/>
 
 ## Installation
 
-<a href="https://repology.org/project/stoat-desktop/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/stoat-desktop.svg" alt="Packaging status" align="right">
-</a>
+- All downloads and instructions for Gangio can be found on our [Website](https://gangio.pro/download).
+- Or grab the latest installer directly from [GitHub Releases](https://github.com/Gangio-App/for-desktop/releases/latest).
 
-- All downloads and instructions for Stoat can be found on our [Website](https://stoat.chat/download).
+Supported platforms:
+
+- **Windows** — `.exe` (Squirrel) installer
+- **macOS** — `.zip` / `.dmg`
+- **Linux** — `.deb` and Flatpak
 
 ## Development Guide
 
@@ -37,8 +44,8 @@ Then proceed to setup:
 
 ```bash
 # clone the repository
-git clone --recursive https://github.com/stoatchat/for-desktop stoat-for-desktop
-cd stoat-for-desktop
+git clone --recursive https://github.com/Gangio-App/for-desktop gangio-for-desktop
+cd gangio-for-desktop
 
 # install all packages
 pnpm i --frozen-lockfile
@@ -72,13 +79,23 @@ pnpm run:nix --force-server=http://localhost:5173
 # Electron Forge where system Electron is
 ```
 
-### Pulling in Stoat's assets
+### Pulling in Gangio's assets
 
-If you want to pull in Stoat brand assets after pulling, run the following:
+If you want to pull in Gangio brand assets after pulling, run the following:
 
 ```bash
 # update the assets
 git -c submodule."assets".update=checkout submodule update --init assets
 ```
 
-Currently, this is required to build, any forks are expected to provide their own assets.
+Currently, this is required to build; any forks are expected to provide their own assets.
+
+## Links
+
+- Website: <https://gangio.pro>
+- Web client: <https://github.com/Gangio-App/for-web>
+- Desktop client: <https://github.com/Gangio-App/for-desktop>
+
+## License
+
+Licensed under the project's [LICENSE](./LICENSE).
